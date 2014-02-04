@@ -43,20 +43,20 @@ function! syntastic#c#ReadConfig(file)
 
     let parameters = []
     for line in lines
-        let matches = matchstr(line, '\m\C^\s*-I\s*\zs.\+')
-        if matches != ''
+        let matches = matchlist(line, '\m\C^\s*\(-\([IF]\s*\|include\s\+\)\)\(.\+\)')
+        if len(matches) > 2 && matches[3] != ''
             " this one looks like an absolute path
-            if match(matches, '\m^\%(/\|\a:\)') != -1
-                call add(parameters, '-I' . matches)
+            if match(matches[3], '\m^\%(/\|\a:\)') != -1
+                call add(parameters, matches[1] . matches[3])
             else
-                call add(parameters, '-I' . filepath . syntastic#util#Slash() . matches)
+                call add(parameters, matches[1] . filepath . syntastic#util#Slash() . matches[3])
             endif
         else
             call add(parameters, line)
         endif
     endfor
 
-    return join(map(parameters, 'syntastic#util#shescape(v:val)'))
+    return join(parameters)
 endfunction
 
 " GetLocList() for C-like compilers
