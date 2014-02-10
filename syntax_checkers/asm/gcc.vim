@@ -1,7 +1,7 @@
 "============================================================================
-"File:        cpp.vim
-"Description: Syntax checking plugin for syntastic.vim
-"Maintainer:  Gregor Uhlenheuer <kongo2002 at gmail dot com>
+"File:        gcc.vim
+"Description: Syntax checking for at&t and intel assembly files with gcc
+"Maintainer:  Josh Rahm <joshuarahm@gmail.com>
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
 "             it and/or modify it under the terms of the Do What The Fuck You
@@ -10,43 +10,42 @@
 "
 "============================================================================
 
-if exists('g:loaded_syntastic_cpp_gcc_checker')
+if exists('g:loaded_syntastic_asm_gcc_checker')
     finish
 endif
-let g:loaded_syntastic_cpp_gcc_checker = 1
+let g:loaded_syntastic_asm_gcc_checker = 1
 
-if !exists('g:syntastic_cpp_compiler')
-    let g:syntastic_cpp_compiler = executable('g++') ? 'g++' : 'clang++'
-endif
-
-if !exists('g:syntastic_cpp_compiler_options')
-    let g:syntastic_cpp_compiler_options = ''
+if !exists('g:syntastic_asm_compiler_options')
+    let g:syntastic_asm_compiler_options = ''
 endif
 
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! SyntaxCheckers_cpp_gcc_IsAvailable() dict
-    return executable(expand(g:syntastic_cpp_compiler))
+function! SyntaxCheckers_asm_gcc_IsAvailable() dict
+    if !exists('g:syntastic_asm_compiler')
+        let g:syntastic_asm_compiler = self.getExec()
+    endif
+    return executable(expand(g:syntastic_asm_compiler))
 endfunction
 
-function! SyntaxCheckers_cpp_gcc_GetLocList() dict
-    return syntastic#c#GetLocList('cpp', 'gcc', {
+function! SyntaxCheckers_asm_gcc_GetLocList() dict
+    return syntastic#c#GetLocList('asm', 'gcc', {
         \ 'errorformat':
         \     '%-G%f:%s:,' .
         \     '%f:%l:%c: %trror: %m,' .
         \     '%f:%l:%c: %tarning: %m,' .
-        \     '%f:%l:%c: %m,'.
-        \     '%f:%l: %trror: %m,'.
-        \     '%f:%l: %tarning: %m,'.
         \     '%f:%l: %m',
-        \ 'main_flags': '-x c++ -fsyntax-only',
-        \ 'header_flags': '-x c++',
-        \ 'header_names': '\m\.\(h\|hpp\|hh\)$' })
+        \ 'main_flags': '-x assembler -fsyntax-only -masm=' . s:GetDialect() })
+endfunction
+
+function! s:GetDialect()
+    return exists('g:syntastic_asm_dialect') ? g:syntastic_asm_dialect :
+        \ expand('%:e') ==? 'asm' ? 'intel' : 'att'
 endfunction
 
 call g:SyntasticRegistry.CreateAndRegisterChecker({
-    \ 'filetype': 'cpp',
+    \ 'filetype': 'asm',
     \ 'name': 'gcc' })
 
 let &cpo = s:save_cpo

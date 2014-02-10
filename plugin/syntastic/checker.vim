@@ -52,6 +52,10 @@ function! g:SyntasticChecker.getExec()
     return self._exec
 endfunction
 
+function! g:SyntasticChecker.getExecEscaped()
+    return syntastic#util#shescape(self.getExec())
+endfunction
+
 function! g:SyntasticChecker.getLocListRaw()
     let name = self._filetype . '/' . self._name
     try
@@ -75,7 +79,7 @@ function! g:SyntasticChecker.makeprgBuild(opts)
     let setting = 'g:syntastic_' . self._filetype . '_' . self._name . '_'
 
     let parts = []
-    call extend(parts, self._getOpt(a:opts, setting, 'exe', self.getExec()))
+    call extend(parts, self._getOpt(a:opts, setting, 'exe', self.getExecEscaped()))
     call extend(parts, self._getOpt(a:opts, setting, 'args', ''))
     call extend(parts, self._getOpt(a:opts, setting, 'fname', syntastic#util#shexpand('%')))
     call extend(parts, self._getOpt(a:opts, setting, 'post_args', ''))
@@ -125,7 +129,7 @@ function! g:SyntasticChecker._shescape(opt)
     if type(a:opt) == type('') && a:opt != ''
         return [a:opt]
     elseif type(a:opt) == type([])
-        return map(a:opt, 'syntastic#util#shescape(v:val)')
+        return map(copy(a:opt), 'syntastic#util#shescape(v:val)')
     endif
 
     return []
