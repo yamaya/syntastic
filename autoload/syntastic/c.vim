@@ -45,11 +45,12 @@ function! syntastic#c#ReadConfig(file)
     for line in lines
         let matches = matchlist(line, '\m\C^\s*\(-\([IF]\s*\|include\s\+\)\)\(.\+\)')
         if len(matches) > 2 && matches[3] != ''
+            let option = matches[1]
             " this one looks like an absolute path
             if match(matches[3], '\m^\%(/\|\a:\)') != -1
-                call add(parameters, matches[1] . matches[3])
+                call add(parameters, option . matches[3])
             else
-                call add(parameters, matches[1] . filepath . syntastic#util#Slash() . matches[3])
+                call add(parameters, option . filepath . syntastic#util#Slash() . matches[3])
             endif
         else
             call add(parameters, line)
@@ -160,7 +161,6 @@ function! s:GetCflags(ft, ck, opts)
     " add optional config file parameters
     let config_file = s:GetCheckerVar('g', a:ft, a:ck, 'config_file', '.syntastic_' . a:ft . '_config')
     let flags .= ' ' . syntastic#c#ReadConfig(config_file)
-
     return flags
 endfunction
 
