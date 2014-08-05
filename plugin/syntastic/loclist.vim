@@ -270,7 +270,7 @@ function! g:SyntasticLoclist.show() " {{{2
 
     if !self.isEmpty()
         let num = winnr()
-        execute "topleft lopen " . syntastic#util#var('loc_list_height')
+        execute "botright lopen " . syntastic#util#var('loc_list_height')
         if num != winnr()
             wincmd p
         endif
