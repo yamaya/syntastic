@@ -1,7 +1,7 @@
 "============================================================================
-"File:        coffeelint.vim
+"File:        mdl.vim
 "Description: Syntax checking plugin for syntastic.vim
-"Maintainer:  Lincoln Stoll <l@lds.li>
+"Maintainer:  Charles Beynon <etothepiipower at gmail dot com>
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
 "             it and/or modify it under the terms of the Do What The Fuck You
@@ -10,38 +10,34 @@
 "
 "============================================================================
 
-if exists("g:loaded_syntastic_coffee_coffeelint_checker")
+if exists("g:loaded_syntastic_markdown_mdl_checker")
     finish
 endif
-let g:loaded_syntastic_coffee_coffeelint_checker = 1
+let g:loaded_syntastic_markdown_mdl_checker = 1
+
+if !exists('g:syntastic_markdown_mdl_sort')
+    let g:syntastic_markdown_mdl_sort = 1
+endif
 
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! SyntaxCheckers_coffee_coffeelint_GetLocList() dict
-    if !exists('s:coffeelint_new')
-        let ver = syntastic#util#getVersion(self.getExecEscaped() . ' --version')
-        call self.log(self.getExec() . ' version =', ver)
-        let s:coffeelint_new = syntastic#util#versionIsAtLeast(ver, [1, 4])
-    endif
-    let makeprg = self.makeprgBuild({ 'args_after': (s:coffeelint_new ? '--reporter csv' : '--csv') })
+function! SyntaxCheckers_markdown_mdl_GetLocList() dict
+    let makeprg = self.makeprgBuild({ 'args': '--warnings' })
 
     let errorformat =
-        \ '%f\,%l\,%\d%#\,%trror\,%m,' .
-        \ '%f\,%l\,%trror\,%m,' .
-        \ '%f\,%l\,%\d%#\,%tarn\,%m,' .
-        \ '%f\,%l\,%tarn\,%m'
+        \ '%E%f:%l: %m,'.
+        \ '%W%f: Kramdown Warning: %m found on line %l'
 
     return SyntasticMake({
         \ 'makeprg': makeprg,
         \ 'errorformat': errorformat,
-        \ 'subtype': 'Style',
-        \ 'returns': [0, 1] })
+        \ 'subtype': 'Style' })
 endfunction
 
 call g:SyntasticRegistry.CreateAndRegisterChecker({
-    \ 'filetype': 'coffee',
-    \ 'name': 'coffeelint'})
+    \ 'filetype': 'markdown',
+    \ 'name': 'mdl'})
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
